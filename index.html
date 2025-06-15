@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Práctica de Comandos Cisco</title>
+ <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+    }
+    h1 {
+      text-align: center;
+      margin-top: 20px;
+    }
+    #quizForm {
+      width: 90%;
+      max-width: 500px;
+      margin: 20px auto;
+    }
+    .question {
+      background: #fff;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      display: none;
+      text-align: center;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 10px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 12px 24px;
+      background: #007acc;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 10px 5px;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #005fa3;
+    }
+    .result {
+      font-size: 1.2em;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    .correct {
+      color: green;
+    }
+    .incorrect {
+      color: red;
+    }
+    .feedback {
+      margin-top: 5px;
+      font-style: italic;
+    }
+    .hidden {
+      display: none;
+    }
+    .controls {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Práctica de Comandos Cisco</h1>
+  <div id="pageIndicator" style="text-align:center; margin-bottom: 10px;"></div>
+  <form id="quizForm"></form>
+  <div class="controls">
+    <button type="button" onclick="prevPage()">Anterior</button>
+    <button type="button" onclick="nextPage()">Siguiente</button>
+    <button type="button" onclick="checkAnswers()">Revisar respuesta</button>
+    <button type="button" onclick="retryFailed()" style="background:#f90;">Reintentar falladas</button>
+    <button type="button" onclick="resetQuiz()" style="background:#666;">Reiniciar todo</button>
+  </div>
+  <div class="result" id="result"></div>
+
+<script>
+    let questions = [
+      { key: "q1",  text: "¿Qué comando se usa para ver las configuraciones actuales del router?", answer: "show running-config" },
+      { key: "q2",  text: "¿Qué comando se usa para usar 'show' en modo config ter?", answer: "do" },
+      { key: "q3",  text: "¿Qué comando se usa para mostrar la IP de todas las interfaces?", answer: "show ip int brief" },
+      { key: "q4",  text: "¿Qué comando muestra todos los protocolos IP usados?", answer: "show ip protocols" },
+      { key: "q5",  text: "¿Qué comando muestra las rutas de direccionamiento?", answer: "show ip route" },
+      { key: "q6",  text: "¿Qué comando muestra los routers vecinos que usan OSPF?", answer: "show ip ospf neighbor" },
+      { key: "q7",  text: "¿Qué comando muestra los datos OSPF?", answer: "show ip ospf database" },
+      { key: "q8",  text: "¿Qué comando muestra la tabla de direcciones MAC (CAM)?", answer: "show mac-address-table" },
+      { key: "q9",  text: "¿Qué comando muestra información sobre las VLANs?", answer: "show vlan brief" },
+      { key: "q10", text: "¿Qué comando muestra el tipo de puerto en g0/0 ?", answer: "show int g0/0 switchport" },
+      { key: "q11", text: "¿Qué comando muestra las interfaces troncales y las VLANs permitidas?", answer: "show int trunk" },
+      { key: "q12", text: "¿Qué comando muestra qué IP se ha dado a cada dispositivo por DHCP?", answer: "show ip dhcp bindings" },
+      { key: "q13", text: "¿Qué comando muestra las traducciones NAT?", answer: "show ip nat translations" },
+      { key: "q14", text: "¿Qué comando muestra las estadísticas de NAT?", answer: "show ip nat statistics" },
+      { key: "q15", text: "¿Qué comando muestra las IP permitidas o denegadas de la lista 1?", answer: "show access-list 1" },
+      { key: "q16", text: "¿Qué comando te permite entrar en una interfaz g0/0?", answer: "int g0/0" },
+      { key: "q17", text: "¿Qué comando niega un comando anterior?", answer: "no" },
+      { key: "q18", text: "¿Qué comando configura la IP en una interfaz?", answer: "ip address" },
+      { key: "q19", text: "¿Qué comando apaga una interfaz?", answer: "shutdown" },
+      { key: "q20", text: "¿Qué comando configura una ruta estática?", answer: "ip route" },
+      { key: "q21", text: "¿Qué comando configura la ruta por defecto?", answer: "ip route 0.0.0.0 0.0.0.0" },
+      { key: "q22", text: "¿Qué comando crea el proceso OSPF?", answer: "router ospf" },
+      { key: "q23", text: "¿Qué comando asigna un router-id dentro del proceso OSPF?", answer: "router-id" },
+      { key: "q24", text: "¿Qué comando indica qué redes anunciar en OSPF?", answer: "network" },
+      { key: "q25", text: "¿Qué comando hace que una interfaz no emita/reciba OSPF?", answer: "passive-interface" },
+      { key: "q26", text: "¿Qué comando emite la ruta por defecto en OSPF?", answer: "default-information originate" },
+      { key: "q27", text: "¿Qué comando crea una VLAN?", answer: "vlan" },
+      { key: "q28", text: "¿Qué comando da nombre a una VLAN?", answer: "name" },
+      { key: "q29", text: "¿Qué comando designa el modo de puerto en una interfaz?", answer: "switchport mode" },
+      { key: "q30", text: "¿Qué comando asigna una VLAN a una interfaz access?", answer: "switchport access vlan" },
+      { key: "q31", text: "¿Qué comando permite VLANs en una interfaz trunk?", answer: "switchport trunk allowed vlan" },
+      { key: "q32", text: "¿Qué comando entra en una subinterfaz g0/0.10 del router?", answer: "int g0/0.10" },
+      { key: "q33", text: "¿Qué comando configura la encapsulación VLAN en una subinterfaz?", answer: "encapsulation dot1q" },
+      { key: "q34", text: "¿Qué comando excluye IPs de un pool DHCP?", answer: "ip dhcp excluded-address" },
+      { key: "q35", text: "¿Qué comando crea un pool de direcciones DHCP?", answer: "ip dhcp pool" },
+      { key: "q36", text: "¿Qué comando asigna una red a un pool DHCP?", answer: "network" },
+      { key: "q37", text: "¿Qué comando define el router por defecto en DHCP?", answer: "default-router" },
+      { key: "q38", text: "¿Qué comando asigna un helper de DHCP en una interfaz?", answer: "ip helper-address" },
+      { key: "q39", text: "¿Qué comando define una interfaz como interna para NAT?", answer: "ip nat inside" },
+      { key: "q40", text: "¿Qué comando configura NAT estática?", answer: "ip nat inside source static" },
+      { key: "q41", text: "¿Qué comando crea un pool de IPs para NAT dinámica?", answer: "ip nat pool" },
+      { key: "q42", text: "¿Qué comando crea una ACL para NAT?", answer: "access-list" },
+      { key: "q43", text: "¿Qué comando vincula una ACL a un pool NAT?", answer: "ip nat inside source list" },
+      { key: "q44", text: "¿Qué comando usa sobrecarga (PAT) en una interfaz g0/0 para la lista 1?", answer: "ip nat inside source list 1 int g0/0 overload" },
+      { key: "q45", text: "¿Qué comando define una interfaz como externa para NAT?", answer: "ip nat outside" },
+    ];
+  
+  questions = questions.sort(() => Math.random() - 0.5);
+
+  const form = document.getElementById("quizForm");
+  let currentPage = 0;
+  const pageSize = 1;
+
+  // Estado para preguntas mostradas en el quiz actual
+  let currentQuestions = [...questions];
+  // Arreglo para marcar si se revisó la respuesta
+  let checked = new Array(currentQuestions.length).fill(false);
+  // Arreglo con índices en 'questions' de preguntas falladas
+  let failedQuestions = [];
+
+  // Crear preguntas en el DOM según currentQuestions
+  function createQuestions() {
+    form.innerHTML = ""; // Limpia antes
+    checked = new Array(currentQuestions.length).fill(false);
+    currentQuestions.forEach((q, index) => {
+      const div = document.createElement("div");
+      div.className = "question";
+      div.dataset.index = index;
+      div.innerHTML = `
+        <label>${q.text}</label>
+        <input type="text" name="${q.key}" autocomplete="off" />
+        <div id="feedback-${q.key}" class="feedback" aria-live="polite"></div>
+      `;
+      form.appendChild(div);
+    });
+  }
+
+  function showPage(page) {
+    const items = document.querySelectorAll(".question");
+    items.forEach((item, i) => {
+      item.style.display = i === page ? "block" : "none";
+    });
+    document.getElementById("pageIndicator").textContent = `Pregunta ${page + 1} de ${currentQuestions.length}`;
+  }
+
+  function normalize(str) {
+    return str.trim().toLowerCase()
+              .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+              .replace(/\s+/g, " ");
+  }
+
+  const synonyms = {
+  "interface": "int",
+  "interfaces": "int",
+  "trans":"translations",
+  "stats":"statistics"
+};
+
+function replaceSynonyms(text) {
+  return text.split(/\s+/).map(word => synonyms[word.toLowerCase()] || word).join(" ");
+}
+
+function checkAnswers() {
+  const q = currentQuestions[currentPage];
+  const input = form.elements[q.key];
+  let userAnswer = normalize(input.value);
+  userAnswer = replaceSynonyms(userAnswer); // <-- aplicar sinónimos
+  let expected = normalize(q.answer.replace(/<.*?>/g, ""));
+
+  // También aplicamos sinónimos a la respuesta esperada para evitar conflictos
+  expected = replaceSynonyms(expected);
+
+  const feedback = document.getElementById(`feedback-${q.key}`);
+
+  if (userAnswer.includes(expected)) {
+    input.style.borderColor = "green";
+    feedback.innerHTML = "<span class='correct'>Correcto</span>";
+    checked[currentPage] = true;
+    // Quitar de falladas si estaba
+    const originalIndex = questions.findIndex(item => item.key === q.key);
+    const failIndex = failedQuestions.indexOf(originalIndex);
+    if (failIndex !== -1) failedQuestions.splice(failIndex, 1);
+  } else {
+    input.style.borderColor = "red";
+    feedback.innerHTML = `<span class='incorrect'>Incorrecto. Respuesta correcta: <code>${q.answer}</code></span>`;
+    checked[currentPage] = true;
+    // Añadir a falladas si no está ya
+    const originalIndex = questions.findIndex(item => item.key === q.key);
+    if (!failedQuestions.includes(originalIndex)) {
+      failedQuestions.push(originalIndex);
+    }
+  }
+}
+
+  function nextPage() {
+    const resultDiv = document.getElementById("result");
+    resultDiv.textContent = "";
+    if (!checked[currentPage]) {
+      resultDiv.textContent = "Debes revisar la respuesta antes de continuar.";
+      resultDiv.style.color = "red";
+      return;
+    }
+    if (currentPage + 1 < currentQuestions.length) {
+      currentPage++;
+      showPage(currentPage);
+    }
+  }
+
+  function prevPage() {
+    const resultDiv = document.getElementById("result");
+    resultDiv.textContent = "";
+    if (currentPage > 0) {
+      currentPage--;
+      showPage(currentPage);
+    }
+  }
+
+  // Cambiar el quiz para solo preguntas falladas
+  function retryFailed() {
+    if (failedQuestions.length === 0) {
+      alert("No tienes preguntas falladas para reintentar.");
+      return;
+    }
+    currentQuestions = failedQuestions.map(i => questions[i]);
+    currentPage = 0;
+    createQuestions();
+    showPage(currentPage);
+  }
+
+  // Resetear el quiz completo
+  function resetQuiz() {
+    currentQuestions = [...questions];
+    currentPage = 0;
+    failedQuestions = [];
+    createQuestions();
+    showPage(currentPage);
+    document.getElementById("result").textContent = "";
+  }
+
+  // Inicializar quiz completo al cargar
+  createQuestions();
+  showPage(currentPage);
+</script>
+</body>
+</html>
