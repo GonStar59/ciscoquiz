@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Práctica de Comandos Cisco</title>
+  <title>Quiz Comandos Cisco</title>
  <style>
     body {
       font-family: Arial, sans-serif;
@@ -383,6 +383,8 @@ function checkAnswers() {
   function resetQuiz() {
     currentQuestions = [...questions];
     currentPage = 0;
+    correctCount = 0;
+    correctMap = {};
     failedQuestions = [];
     createQuestions();
     showPage(currentPage);
