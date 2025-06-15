@@ -97,6 +97,23 @@
       background-color: #4caf50;
       transition: width 0.3s ease;
     }
+    .quiz-button {
+      display:block;
+      padding: 12px 24px;
+      background: #00b800;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+      width: 90%;                
+      max-width: 600px; 
+      margin: 20px auto;
+    }
+    .quiz-button:hover {
+      background: #005fa3;
+    }
 
   </style>
 </head>
@@ -108,9 +125,9 @@
   <div id="pageIndicator" style="text-align:center; margin-bottom: 10px;"></div>
   <form id="quizForm"></form>
   <div class="controls">
+    <button id="nextButton" type="button" class="quiz-button" onclick="nextPage()" style="display: none;">Siguiente</button>
+    <button id="checkButton" type="button" class="quiz-button" onclick="checkAnswers()">Revisar respuesta</button>
     <button type="button" onclick="prevPage()">Anterior</button>
-    <button type="button" onclick="nextPage()">Siguiente</button>
-    <button type="button" onclick="checkAnswers()">Revisar respuesta</button>
     <button type="button" onclick="retryFailed()" style="background:#f90;">Reintentar falladas</button>
     <button type="button" onclick="resetQuiz()" style="background:#666;">Reiniciar todo</button>
   </div>
@@ -261,6 +278,9 @@ function checkAnswers() {
       failedQuestions.push(originalIndex);
     }
   }
+  document.getElementById("nextButton").style.display = "block";
+  document.getElementById("checkButton").style.display = "none";
+
 }
 
   function nextPage() {
@@ -298,6 +318,8 @@ function checkAnswers() {
   currentPage = 0;
   createQuestions();
   showPage(0);
+  document.getElementById("nextButton").style.display = "none";
+  document.getElementById("checkButton").style.display = "block";
 }
 
   function prevPage() {
@@ -307,6 +329,8 @@ function checkAnswers() {
       currentPage--;
       showPage(currentPage);
     }
+    document.getElementById("nextButton").style.display = "block";
+    document.getElementById("checkButton").style.display = "none";
   }
 
   // Cambiar el quiz para solo preguntas falladas
@@ -319,6 +343,8 @@ function checkAnswers() {
     currentPage = 0;
     createQuestions();
     showPage(currentPage);
+    document.getElementById("nextButton").style.display = "none";
+    document.getElementById("checkButton").style.display = "block";
   }
 
   // Resetear el quiz completo
@@ -329,6 +355,8 @@ function checkAnswers() {
     createQuestions();
     showPage(currentPage);
     document.getElementById("result").textContent = "";
+    document.getElementById("nextButton").style.display = "none";
+    document.getElementById("checkButton").style.display = "block";
   }
 
   // Inicializar quiz completo al cargar
