@@ -157,9 +157,8 @@
     <button id="nextButton" type="button" class="quiz-button" onclick="nextPage()" style="display: none;">Siguiente</button>
     <button id="checkButton" type="button" class="quiz-button" onclick="checkAnswers()">Revisar respuesta</button>
   </div>
-
   <div class="small-buttons">
-    <button type="button" onclick="prevPage()" class="small-button">&lt;</button>
+    <!--<button type="button" onclick="prevPage()" class="small-button">&lt;</button>--> 
     <button type="button" onclick="retryFailed()" class="small-button" style="background:#f90;">Reintentar falladas</button>
     <button type="button" onclick="resetQuiz()" class="small-button" style="background:#666;">↻</button>
   </div>
@@ -222,6 +221,8 @@
   let correctCount = 0;
   let correctMap = {}; // key => true si ya se acertó
 
+  
+
   // Estado para preguntas mostradas en el quiz actual
   let currentQuestions = [...questions];
   // Arreglo para marcar si se revisó la respuesta
@@ -229,6 +230,7 @@
   // Arreglo con índices en 'questions' de preguntas falladas
   let failedQuestions = [];
 
+  loadProgress();
   // Crear preguntas en el DOM según currentQuestions
   function createQuestions() {
     form.innerHTML = ""; // Limpia antes
@@ -251,10 +253,6 @@
     items.forEach((item, i) => {
       item.style.display = i === page ? "block" : "none";
     });
-    const progress = Math.min(100, Math.round((correctCount / total) * 100));
-    document.getElementById("pageIndicator").textContent = `Progreso: ${progress}%`;
-    document.getElementById("progressBar").style.width = `${progress}%`;
-
   }
 
   function normalize(str) {
@@ -294,6 +292,7 @@ function checkAnswers() {
     if (!correctMap[q.key]) {
       correctMap[q.key] = true;
       correctCount++;
+      
     }
 
     // Quitar de falladas si estaba
@@ -312,7 +311,8 @@ function checkAnswers() {
   }
   document.getElementById("nextButton").style.display = "block";
   document.getElementById("checkButton").style.display = "none";
-
+  updateProgressBar();
+  
 }
 
   function nextPage() {
@@ -352,6 +352,7 @@ function checkAnswers() {
   showPage(0);
   document.getElementById("nextButton").style.display = "none";
   document.getElementById("checkButton").style.display = "block";
+  saveProgress();
 }
 
   function prevPage() {
@@ -393,6 +394,58 @@ function checkAnswers() {
     document.getElementById("checkButton").style.display = "block";
   }
 
+  function setCookie(nombre, valor, dias) {
+    const expira = new Date();
+    expira.setTime(expira.getTime() + (dias * 24 * 60 * 60 * 1000));
+    const expiracion = "expires=" + expira.toUTCString();
+    document.cookie = `${nombre}=${encodeURIComponent(valor)}; ${expiracion}; path=/`;
+  }
+  function getCookie(name) {
+    const cookies = document.cookie.split(';');
+    for (let c of cookies) {
+      let [key, val] = c.trim().split('=');
+      if (key === name) return decodeURIComponent(val);
+    }
+    return null;
+  }
+
+  function updateProgressBar() {
+    const progress = Math.min(100, Math.round((correctCount / total) * 100));
+    document.getElementById("pageIndicator").textContent = `Progreso: ${progress}%`;
+    document.getElementById("progressBar").style.width = `${progress}%`;
+  }
+
+  function saveProgress() {
+    setCookie("correctMap", JSON.stringify(correctMap), 7); // 7 días de duración
+    setCookie("failedQuestions", JSON.stringify(failedQuestions), 7);
+    setCookie("correctCount", correctCount, 7);
+    setCookie("currentPage", currentPage, 7);
+    setCookie("checked", JSON.stringify(checked), 7);
+    // currentQuestions es opcional, porque es copia de questions, pero si aleatorizaste:
+    setCookie("currentQuestionsKeys", JSON.stringify(currentQuestions.map(q => q.key)), 7);
+  }
+
+  // Recuperar cookies al cargar
+  function loadProgress() {
+    const savedCorrectMap = getCookie("correctMap");
+    const savedFailed = getCookie("failedQuestions");
+    const savedCount = getCookie("correctCount");
+    const savedPage = getCookie("currentPage");
+    const savedChecked = getCookie("checked");
+    const savedCurrentQuestionsKeys = getCookie("currentQuestionsKeys");
+
+    if (savedCorrectMap) correctMap = JSON.parse(savedCorrectMap);
+    if (savedFailed) failedQuestions = JSON.parse(savedFailed);
+    if (savedCount) correctCount = parseInt(savedCount);
+    if (savedPage) currentPage = parseInt(savedPage);
+    if (savedChecked) checked = JSON.parse(savedChecked);
+
+    if (savedCurrentQuestionsKeys) {
+      // Reconstruir currentQuestions en base a keys
+      currentQuestions = savedCurrentQuestionsKeys.map(key => questions.find(q => q.key === key)).filter(Boolean);
+    }
+    updateProgressBar();
+  }
   // Inicializar quiz completo al cargar
   createQuestions();
   showPage(currentPage);
