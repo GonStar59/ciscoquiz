@@ -428,22 +428,65 @@ function checkAnswers() {
   // Recuperar cookies al cargar
   function loadProgress() {
     const savedCorrectMap = getCookie("correctMap");
-    const savedFailed = getCookie("failedQuestions");
-    const savedCount = getCookie("correctCount");
-    const savedPage = getCookie("currentPage");
-    const savedChecked = getCookie("checked");
-    const savedCurrentQuestionsKeys = getCookie("currentQuestionsKeys");
-
-    if (savedCorrectMap) correctMap = JSON.parse(savedCorrectMap);
-    if (savedFailed) failedQuestions = JSON.parse(savedFailed);
-    if (savedCount) correctCount = parseInt(savedCount);
-    if (savedPage) currentPage = parseInt(savedPage);
-    if (savedChecked) checked = JSON.parse(savedChecked);
-
-    if (savedCurrentQuestionsKeys) {
-      // Reconstruir currentQuestions en base a keys
-      currentQuestions = savedCurrentQuestionsKeys.map(key => questions.find(q => q.key === key)).filter(Boolean);
+    if (savedCorrectMap) {
+      try {
+        correctMap = JSON.parse(savedCorrectMap);
+      } catch {
+        correctMap = {};
+      }
     }
+
+    const savedFailed = getCookie("failedQuestions");
+    if (savedFailed) {
+      try {
+        failedQuestions = JSON.parse(savedFailed);
+      } catch {
+        failedQuestions = [];
+      }
+    }
+
+    const savedCount = getCookie("correctCount");
+    if (savedCount) {
+      try {
+        correctCount = parseInt(savedCount);
+        if (isNaN(correctCount)) correctCount = 0;
+      } catch {
+        correctCount = 0;
+      }
+    }
+
+    const savedPage = getCookie("currentPage");
+    if (savedPage) {
+      try {
+        currentPage = parseInt(savedPage);
+        if (isNaN(currentPage)) currentPage = 0;
+      } catch {
+        currentPage = 0;
+      }
+    }
+
+    const savedChecked = getCookie("checked");
+    if (savedChecked) {
+      try {
+        checked = JSON.parse(savedChecked);
+        if (!Array.isArray(checked)) checked = new Array(currentQuestions.length).fill(false);
+      } catch {
+        checked = new Array(currentQuestions.length).fill(false);
+      }
+    }
+
+    const savedCurrentQuestionsKeys = getCookie("currentQuestionsKeys");
+    if (savedCurrentQuestionsKeys) {
+      try {
+        const keys = JSON.parse(savedCurrentQuestionsKeys);
+        if (Array.isArray(keys)) {
+          currentQuestions = keys.map(key => questions.find(q => q.key === key)).filter(Boolean);
+        }
+      } catch {
+        currentQuestions = [...questions];
+      }
+    }
+
     updateProgressBar();
   }
   // Inicializar quiz completo al cargar
