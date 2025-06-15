@@ -78,12 +78,10 @@
     .hidden {
       display: none;
     }
-    .controls {
-      text-align: center;
-      margin-bottom: 30px;
-    }
+   
+
     #progressContainer {
-      width: 80%;
+      width: 90%;
       height: 20px;
       background-color: #e0e0e0;
       border-radius: 10px;
@@ -97,8 +95,17 @@
       background-color: #4caf50;
       transition: width 0.3s ease;
     }
+
+    .controls {
+      width: 90%;
+      max-width: 500px;
+      margin: 20px auto;
+      text-align: center;
+    }
+
     .quiz-button {
-      display:block;
+      display: block;
+      width: 100%;
       padding: 12px 24px;
       background: #00b800;
       color: white;
@@ -106,13 +113,35 @@
       border-radius: 8px;
       cursor: pointer;
       font-size: 16px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
       transition: background-color 0.3s ease;
-      width: 90%;                
-      max-width: 600px; 
-      margin: 20px auto;
     }
     .quiz-button:hover {
       background: #005fa3;
+    }
+
+    .small-buttons {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .small-button {
+      display: inline-block;
+      margin: 0 8px;
+      padding: 8px 16px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      color: white;
+      vertical-align: middle;
+      background-color: #666;
+      transition: background-color 0.3s ease;
+    }
+
+    .small-button:hover {
+      background-color: #444;
     }
 
   </style>
@@ -127,9 +156,12 @@
   <div class="controls">
     <button id="nextButton" type="button" class="quiz-button" onclick="nextPage()" style="display: none;">Siguiente</button>
     <button id="checkButton" type="button" class="quiz-button" onclick="checkAnswers()">Revisar respuesta</button>
-    <button type="button" onclick="prevPage()">Anterior</button>
-    <button type="button" onclick="retryFailed()" style="background:#f90;">Reintentar falladas</button>
-    <button type="button" onclick="resetQuiz()" style="background:#666;">Reiniciar todo</button>
+  </div>
+
+  <div class="small-buttons">
+    <button type="button" onclick="prevPage()" class="small-button">&lt;</button>
+    <button type="button" onclick="retryFailed()" class="small-button" style="background:#f90;">Reintentar falladas</button>
+    <button type="button" onclick="resetQuiz()" class="small-button" style="background:#666;">↻</button>
   </div>
   <div class="result" id="result"></div>
 
