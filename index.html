@@ -147,7 +147,7 @@
   </style>
 </head>
 <body>
-  <h1>Práctica de Comandos Cisco</h1>
+  <h1>Quiz de Comandos Cisco</h1>
   <div id="progressContainer">
   <div id="progressBar"></div>
   </div>
@@ -382,6 +382,7 @@ function checkAnswers() {
 
   // Resetear el quiz completo
   function resetQuiz() {
+    questions = questions.sort(() => Math.random() - 0.5);
     currentQuestions = [...questions];
     currentPage = 0;
     correctCount = 0;
@@ -392,6 +393,7 @@ function checkAnswers() {
     document.getElementById("result").textContent = "";
     document.getElementById("nextButton").style.display = "none";
     document.getElementById("checkButton").style.display = "block";
+    updateProgressBar();
   }
 
   function setCookie(nombre, valor, dias) {
